@@ -54,7 +54,7 @@ array_names["elevator rotation"] = ERL
 
 # if randomize set to False, then all constant parameters will just take their minimum value (essentially, set their index to 0)
 randomize = False
-sweep_pair = np.array(["pitch","elevator rotation"]) # The two parameters we want to vary in the 2D plot
+sweep_pair = np.array(["elevator rotation","pitch"]) # The two parameters we want to vary in the 2D plot
 
 # indices = np.zeros(ndims)
 for i in sweep_pair:
@@ -67,25 +67,13 @@ if randomize:
             indices[i] = np.random.randint(0,ndims-1)
 
 
-# These worked for the old, 6 parameter data
-# Pitch to 5 deg
-# indices[2] = 2
-
-# speed to 200 m/s
-# indices[0] = 3
-
-#chs ~5 m
-# indices[2] = 3
-
-# whs ~12 m
-# indices[3] = 1
+indices[0] = 3
 
 indices = tuple(indices)
 
 #%% Plot the data
 X = array_names[sweep_pair[0]][indices]
 Y = array_names[sweep_pair[1]][indices]
-
 
 Z = Fx[indices]/1000
 output_label = "Forces in $x$-axis [kN]"
@@ -111,10 +99,9 @@ print(f'ER: {ERL[tuple(indices)]}')
 plt.figure(figsize=(8, 6))
 im = plt.pcolormesh(X, Y, Z, shading='auto', cmap='viridis')
 
-plt.xlabel(sweep_pair[0].title())
-plt.ylabel(sweep_pair[1].title())
-plt.title("\n".join(wrap(f'{output_label} as function of {sweep_pair[0]} and {sweep_pair[1]}')))
-plt.colorbar(im, label=f'{output_label}')
+plt.xlabel('Elevator rotation angle, $\delta_e$ [rad]')
+plt.ylabel('Pitch angle, $\\theta$ [rad]')
+plt.colorbar(im, label='Forces in $x$-axis, $F_x$ [kN]')
 
 plt.tight_layout()
 plt.show()

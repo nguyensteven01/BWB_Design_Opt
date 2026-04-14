@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 ''' This script is for processing some of the data and making some plots'''
 
-def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True):
+def plot_the_sets(opt_path,init_csv_file,projection_line=True):
 
     N_res = 6
     plt.rc('xtick', labelsize=14)
@@ -101,13 +101,7 @@ def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True):
 
     plt.grid()
     plt.axis('auto')
-    if saveit:
-        plt.savefig(f"{opt_path}/{model_type}_reach_proj_{states_abbrev[col1]}_{states_abbrev[col2]}.png",dpi=300)
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures/Reach Sets'
-        plt.savefig(f'{path_to_paper}/{model_type}_reach_proj_{states_abbrev[col1]}_{states_abbrev[col2]}.png',dpi=300)
-    else:
-        # plt.axis('equal')
-        plt.show()
+    plt.show()
 
     col1 = 0
     col2 = 1
@@ -117,7 +111,6 @@ def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True):
     plot_hull_projection(hull1,col_x=col1,col_y=col2,hull_plot_label="Optimized Set",point_label="Optimized Interior",hull_color="r", ls='solid')
     plt.xlabel(states[col1],fontsize=fsize)
     plt.ylabel(states[col2],fontsize=fsize)
-    # plt.title(f"Projection of Reachable Set onto {states[col1]} and {states[col2]}",fontsize=fsize)
 
     if projection_line:
         hull = hull1
@@ -157,31 +150,16 @@ def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True):
 
     plt.grid()
     plt.axis('auto')
-    if saveit:
-        plt.savefig(f"{opt_path}/{model_type}_reach_proj_{states_abbrev[col1]}_{states_abbrev[col2]}.png",dpi=300)
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures/Reach Sets'
-        plt.savefig(f'{path_to_paper}/{model_type}_reach_proj_{states_abbrev[col1]}_{states_abbrev[col2]}.png',dpi=300)
-    else:
-        plt.show()
+    plt.show()
 
 if __name__ == "__main__":
     opt_path2 = "Output/aero_7dim_asym/N6_110max"
     opt_path1 = "Output/aero_7dim_asym/N6_volmax"
     opt_path3 = "Output/aero_7dim_asym/N6_volmax_110con"
-
-    opt_path4 = "Output/aero_7dim_asym/N6_volmax_sphere"
-    opt_path5 = "Output/aero_7dim_asym/N6_110max_sphere"
-    opt_path6 = "Output/aero_7dim_asym/N6_volmax_110con_sphere"
-
-    # models = [opt_path4,opt_path5,opt_path6]
     models = [opt_path1, opt_path2, opt_path3]
 
     init_file = 'Output/aero_7dim_asym/N6_initial/bwb_inf_data.csv'
-    # models = ['Output/aero_7dim_asym/N6_initial_sphere']
-    # models = [opt_path4]
 
-
-    saveit = False
     proj = False
     for file in models:
-        plot_the_sets(file,init_file,saveit,projection_line = proj)
+        plot_the_sets(file,init_file,projection_line = proj)

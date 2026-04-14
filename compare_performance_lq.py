@@ -119,10 +119,6 @@ def make_lq_plots(opt_path, case):
     # Adjust layout and show the figure
     plt.tight_layout()
 
-    # Add a text box with the L2 norms below the plot
-    caption = f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}"
-    plt.figtext(0.4, 0.3, caption, wrap=True, horizontalalignment='center', fontsize=15)
-
     print(f'Showing {model_type} for case {case}')
     print(f'Optimized tracking error: {error_opt}, initial tracking error: {error_init}, change of: {(error_init-error_opt)/error_init*100:.2f}%')
     print(f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}, change of: {(u_l2_norm_init-u_l2_norm_opt)/u_l2_norm_init*100:.2f}")

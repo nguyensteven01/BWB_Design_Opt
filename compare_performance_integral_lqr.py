@@ -99,10 +99,6 @@ def make_integral_plots(opt_path, case):
     plt.legend(loc='best')  # Set legend location to center right
     plt.grid(True)
 
-    # if show_error:
-    #     error_caption = f"Optimal tracking error: {error_opt}, initial tracking error: {error_init}"
-    #     plt.figtext(0.5, 0.8, error_caption, wrap=True, horizontalalignment='center', fontsize=15)
-
     # Plot 5: Control input
     plt.subplot(2, 1, 2)
     plt.plot(t_opt, u_opt[0, :], label='$\delta_{th}$ Optimized', color=opt_color, lw=4, linestyle='dashdot')
