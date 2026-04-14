@@ -1,0 +1,148 @@
+# Reachability-Based Design Optimization for a Blended Wing Body Aircraft
+
+This repository contains the Python codebase accompanying the paper. The code implements a reachability-based framework for optimizing the longitudinal design parameters of a Blended Wing Body (BWB) aircraft, using control-theoretic tools including LQR tracking, reachable set computation, and nonlinear simulation.
+
+---
+
+## Repository Structure
+
+```
+├── Aero_data/
+│   └── aero_7dim2.npz          # Tabulated aerodynamic data (7-dimensional grid)
+├── Output/
+│   └── aero_7dim_asym/
+│       ├── N6_initial/         # Reachability data for the initial design
+│       ├── N6_volmax/          # Results: volume-maximizing optimization
+│       ├── N6_110max/          # Results: directional-extent maximizing optimization
+│       └── N6_volmax_110con/   # Results: volume maximization with directional constraint
+├── interpolatory_model.py
+├── nonlinear_model.py
+├── trim_aircraft.py
+├── solve_rde.py
+├── ref_trackers.py
+├── compute_inf_reach_set.py
+├── reach_set_functions.py
+├── design_optimization.py
+├── process_plot_data.py
+├── compare_performance_lq.py
+├── compare_performance_integral_lqr.py
+├── pitch_integrator_nonlinear.py
+├── plot_aero_data_sweeps.py
+├── plotters.py
+├── read_hdf5.py
+└── progress_bar.py
+```
+
+---
+
+## File Descriptions
+
+### Core Model Files
+
+**`interpolatory_model.py`**  
+Loads the tabulated aerodynamic data from the `.npz` file and builds `RegularGridInterpolator` objects for all aerodynamic force and moment derivatives (e.g., `X_v`, `Z_alpha`, `M_deltae`). Also provides `build_AB()`, which evaluates these interpolators at a given flight point to construct the linearized longitudinal state-space matrices `A` and `B`. The state vector is `[V, α, q, θ]` (airspeed, angle of attack, pitch rate, pitch angle) and inputs are `[δ_T, δ_e]` (thrust fraction, elevator deflection).
+
+**`nonlinear_model.py`**  
+Implements the full nonlinear longitudinal equations of motion for the BWB. Provides `nonlinear_track_velocity()` and `nonlinear_track_pitch()`, which simulate the aircraft under an LQR+integrator controller designed around the linearized model. Supports a switching flight condition (two consecutive trim points connected at a specified `switch_time`). Used for high-fidelity validation of controller designs derived from the linear model.
+
+**`trim_aircraft.py`**  
+Computes the trimmed flight condition (angle of attack, elevator deflection, thrust, and pitch angle) for a given airspeed, center halfspan, and wing halfspan using `scipy.optimize`. Trim is found by solving the nonlinear equations of motion as equality constraints with a penalty-based optimizer.
+
+### Control Design Files
+
+**`solve_rde.py`**  
+Solves the Matrix Riccati Differential Equation (RDE) backward in time using `scipy.integrate.solve_ivp`. Optionally solves the coupled co-state ODE for optimal reference tracking (the `η` equation). Returns time-indexed arrays of `P(t)` and `η(t)` for use in finite-horizon LQR controllers.
+
+**`ref_trackers.py`**  
+Implements two linear reference tracking strategies for the longitudinal system:
+- `lqr_ref_track()`: Finite-horizon LQR tracking that solves the RDE backward in time and simulates the optimal closed-loop forward. Supports velocity, pitch, or angle-of-attack tracking.
+- `integral_ref_track()`: Infinite-horizon LQR with an augmented integrator state to eliminate steady-state tracking error, with anti-windup logic.
+
+### Reachability Analysis Files
+
+**`compute_inf_reach_set.py`**  
+Computes the reachable set of a continuous-time LTI system under bang-bang (infinity-norm optimal) control over a finite time horizon. Samples costate initial conditions on the unit sphere in `ℝ⁴`, simulates the resulting state trajectory for each, and returns the array of final states and associated control costs. Optionally saves results to CSV.
+
+**`reach_set_functions.py`**  
+Utility functions for working with the reachable set data:
+- `compute_hull()`: Computes the convex hull of final-state samples filtered by control cost threshold.
+- `plot_hull_projection()`: Projects a 4D convex hull onto a 2D plane and renders it with `matplotlib`.
+- `unpack_reach_set_data()`: Reads a CSV output from `compute_inf_reach_set.py` and reshapes the data into structured arrays.
+
+### Design Optimization File
+
+**`design_optimization.py`**  
+The main optimization driver. The design variables are center halfspan (`chs`) and wing halfspan (`whs`) of the BWB. At each function evaluation, this script re-trims the aircraft, re-builds `A` and `B`, computes the reachable set, and evaluates the objective/constraints. Three optimization problems are solved using `pyslsqp`:
+1. **Volume maximization** (`N6_volmax`): Maximize the volume of the convex hull of the reachable set.
+2. **Directional extent maximization** (`N6_110max`): Maximize the projected extent of the reachable set along a specified direction in the pitch rate–pitch angle plane (110° direction).
+3. **Volume maximization with directional constraint** (`N6_volmax_110con`): Maximize volume subject to a minimum 15% increase in directional extent.
+
+### Plotting and Post-Processing Files
+
+**`plot_aero_data_sweeps.py`** → **Figure 3**  
+Generates 2D color mesh plots of aerodynamic force/moment data (e.g., axial force `F_x`) as functions of two selected parameters (e.g., elevator deflection and pitch angle), with all other parameters held fixed. Used to visualize the aerodynamic database sweeps.
+
+**`design_optimization.py`** → **Figure 4**  
+The optimization convergence plots are saved automatically during the `pyslsqp` runs via the `save_figname` argument. Figure 4 shows the optimization progress (objective value vs. iteration) for the three design problems.
+
+**`process_plot_data.py`** → **Figures 5, 6, 7**  
+Loads reachable set data from CSV for both the initial and optimized designs and generates 2D projections of the convex hulls. Figures show projections onto the `(q, θ)` plane and the `(V, α)` plane, with optional overlay of the directional projection line. Quantitative comparisons (volume change, extent change) are printed to the console.
+
+**`compare_performance_lq.py`** → **Figures 8, 9, 10**  
+Compares the finite-horizon LQR tracking performance (`lqr_ref_track`) between the initial and each of the three optimized designs for pitch angle and airspeed tracking tasks. For each model and case, generates a two-panel plot: (1) tracked state vs. reference, and (2) control history. Tracking error and control effort L2 norms are printed to the console.
+
+**`compare_performance_integral_lqr.py`** → **Figures 11, 12, 13**  
+Analogous to `compare_performance_lq.py` but using the integral LQR controller (`integral_ref_track`). Evaluates both pitch and velocity tracking for the initial and optimized designs, producing the same two-panel format.
+
+**`pitch_integrator_nonlinear.py`** → **Figures 14, 15, 16**  
+Runs nonlinear closed-loop simulations for the pitch-angle tracking task across the initial and all three optimized designs. The aircraft is commanded to follow a two-segment trajectory (switching flight condition at `t = 20 s`). Calls `error_bars()` to generate a grouped bar chart of relative tracking error improvements, and `niceplot_one_at_a_time()` to generate detailed five-panel trajectory comparisons for each optimized model vs. the initial.
+
+### Utility Files
+
+**`plotters.py`**  
+Contains `niceplot_one_at_a_time()` for generating detailed five-panel trajectory plots (airspeed, AOA, pitch rate, pitch angle, controls) comparing an initial and an optimized model, and `error_bars()` for computing and plotting relative tracking error reductions across all model types.
+
+**`read_hdf5.py`**  
+Utilities for reading optimization results stored in HDF5 format by `pyslsqp`. Provides `print_hdf5_contents()`, `print_results_group()`, and `extract_dataset_from_results()` for extracting specific datasets (e.g., optimized design variables `x`) from saved output files.
+
+**`progress_bar.py`**  
+A simple terminal progress bar used during the reachable set sampling loop in `compute_inf_reach_set.py`.
+
+---
+
+## Dependencies
+
+```
+numpy
+scipy
+matplotlib
+pandas
+control          # python-control
+pyslsqp
+h5py
+```
+
+Install via:
+```bash
+pip install numpy scipy matplotlib pandas control pyslsqp h5py
+```
+
+## Reproducing Paper Figures
+
+| Figure | Script | Notes |
+|--------|--------|-------|
+| 3 | `plot_aero_data_sweeps.py` | Run directly; requires `Aero_data/aero_7dim2.npz` |
+| 4 | `design_optimization.py` | Saved automatically during optimization runs |
+| 5–7 | `process_plot_data.py` | Requires optimization CSV outputs in `Output/` |
+| 8–10 | `compare_performance_lq.py` | Requires HDF5 outputs from `design_optimization.py` |
+| 11–13 | `compare_performance_integral_lqr.py` | Requires HDF5 outputs from `design_optimization.py` |
+| 14–16 | `pitch_integrator_nonlinear.py` | Requires HDF5 outputs from `design_optimization.py` |
+
+The recommended execution order for a full reproduction is:
+
+1. `design_optimization.py` (generates all optimized designs)
+2. `process_plot_data.py` (requires CSV outputs; these are generated inside `design_optimization.py` if `save_data=True` is set in `compute_inf_reach_set_sphere`)
+3. `compare_performance_lq.py`
+4. `compare_performance_integral_lqr.py`
+5. `pitch_integrator_nonlinear.py`
+6. `plot_aero_data_sweeps.py` (independent of optimization; can be run at any time)
