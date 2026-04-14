@@ -90,7 +90,7 @@ def unpack_reach_set_data(csv_input,N_res):
 
 if __name__ == "__main__":
     N_res = 6
-    [LX1, LX2, LX3, LX4, control_cost, final_positions] = unpack_p_set_data("test_sphere.csv",N_res)
+    [LX1, LX2, LX3, LX4, control_cost, final_positions] = unpack_reach_set_data("test_sphere.csv",N_res)
     cost_threshold = 1  # Define your cost threshold here
     hull = compute_hull(control_cost, final_positions, cost_threshold)
 
