@@ -34,6 +34,17 @@ This repository contains the Python codebase accompanying the paper. The code im
 ```
 
 ---
+## Reproducing Paper Results
+
+| Result | Script | Notes |
+|--------|--------|-------|
+| Figure 3 | `plot_aero_data_sweeps.py` | Run directly; requires `Aero_data/aero_7dim2.npz` |
+| Geometry Optimizations | `design_optimization.py` | Optimized variables are saved to hdf5 files in `Output/aero_7dim_asym/...` |
+| Figures 5–7 | `process_plot_data.py` | CSV files containing reachable set data for plotting should already be included. Optionally setting `proj` to `True` will add the projection visualization. |
+| Figures 8–10 | `compare_performance_lq.py` | HDF5 outputs from `design_optimization.py` should already be included. Error data will be printed to terminal. |
+| Figures 11–13 | `compare_performance_integral_lqr.py` | HDF5 outputs from `design_optimization.py` should already be included. Error data will be printed to terminal. |
+| Figures 14–16 | `pitch_integrator_nonlinear.py` | HDF5 outputs from `design_optimization.py` should already be included. Error data will be printed to terminal. |
+---
 
 ## File Descriptions
 
@@ -121,28 +132,3 @@ control          # python-control
 pyslsqp
 h5py
 ```
-
-Install via:
-```bash
-pip install numpy scipy matplotlib pandas control pyslsqp h5py
-```
-
-## Reproducing Paper Figures
-
-| Figure | Script | Notes |
-|--------|--------|-------|
-| 3 | `plot_aero_data_sweeps.py` | Run directly; requires `Aero_data/aero_7dim2.npz` |
-| 4 | `design_optimization.py` | Saved automatically during optimization runs |
-| 5–7 | `process_plot_data.py` | Requires optimization CSV outputs in `Output/` |
-| 8–10 | `compare_performance_lq.py` | Requires HDF5 outputs from `design_optimization.py` |
-| 11–13 | `compare_performance_integral_lqr.py` | Requires HDF5 outputs from `design_optimization.py` |
-| 14–16 | `pitch_integrator_nonlinear.py` | Requires HDF5 outputs from `design_optimization.py` |
-
-The recommended execution order for a full reproduction is:
-
-1. `design_optimization.py` (generates all optimized designs)
-2. `process_plot_data.py` (requires CSV outputs; these are generated inside `design_optimization.py` if `save_data=True` is set in `compute_inf_reach_set_sphere`)
-3. `compare_performance_lq.py`
-4. `compare_performance_integral_lqr.py`
-5. `pitch_integrator_nonlinear.py`
-6. `plot_aero_data_sweeps.py` (independent of optimization; can be run at any time)
