@@ -5,19 +5,14 @@
 
 from design_optimization import *
 import numpy as np
-from scipy.integrate import solve_ivp, trapezoid, quad_vec
-from scipy.linalg import inv, expm
+from scipy.integrate import trapezoid
 import matplotlib.pyplot as plt
-import matplotlib
-from scipy.interpolate import RegularGridInterpolator
 from read_hdf5 import extract_dataset_from_results
-from solve_rde import solve_rde
 from ref_trackers import lqr_ref_track
-from plotters import error_bars
 
 #%% Build system matrices, cost matrices, time horizon
 
-def make_lq_plots(opt_path, case, show_error,saveit, do_meas_noise=False, do_proc_noise=False):
+def make_lq_plots(opt_path, case):
     aero_data_file = 'Aero_data/aero_7dim2.npz'
     interp_dict = aero_interps(aero_data_file)
 
@@ -31,8 +26,6 @@ def make_lq_plots(opt_path, case, show_error,saveit, do_meas_noise=False, do_pro
     alpha0, er0, deltaT0, pitch0 = compute_trim_eom(np.asarray([V0,chs,whs]), aero_data_file,climb_angle=0)
     flight_point = np.array([V0, alpha0, er0])
     Tf = 5
-
-    # print(f'Initial trimmed alpha: {np.rad2deg(alpha0)}, deltae: {np.rad2deg(er0)}, deltaT: {deltaT0}, pitch: {np.rad2deg(pitch0)}')
     trim_point = np.array([V0, alpha0, 0, pitch0])
 
     full_flight_point = np.concatenate((flight_point[0:2], x, flight_point[2:]))
@@ -48,14 +41,7 @@ def make_lq_plots(opt_path, case, show_error,saveit, do_meas_noise=False, do_pro
     u_lower = np.array([thrust_lb, elev_lb])
 
     # Simulate the system's LQ tracking
-    t_init, x_init, xref_init, u_init, error_init = lqr_ref_track(A,B,case,Tf=Tf,u_ub = u_upper,u_lb = u_lower, do_meas_noise=do_meas_noise, do_proc_noise=do_proc_noise)
-
-    init_dict = {
-        't':t_init,
-        'x':x_init,
-        'u':u_init,
-        'tp':np.tile(trim_point.reshape(-1,1),t_init.size)
-    }
+    t_init, x_init, xref_init, u_init, error_init = lqr_ref_track(A,B,case,Tf=Tf,u_ub = u_upper,u_lb = u_lower)
 
     # Optimized design
     
@@ -65,11 +51,9 @@ def make_lq_plots(opt_path, case, show_error,saveit, do_meas_noise=False, do_pro
     whs = x[1]
     alpha0, er0, deltaT0, pitch0 = compute_trim_eom(np.asarray([V0,chs,whs]), aero_data_file,climb_angle=0)
     flight_point = np.array([V0, alpha0, er0])
-    # print(f'Optimized trimmed alpha: {np.rad2deg(alpha0)}, deltae: {np.rad2deg(er0)}, deltaT: {deltaT0}, pitch: {np.rad2deg(pitch0)}')
     trim_point = np.array([V0, alpha0, 0, pitch0])
 
     model_type = opt_path.split('/')[-1][3:]
-    figname = f'{model_type}_lqr_{case}_compare.png'
 
     # First construct A,B matrices
     full_flight_point = np.concatenate((flight_point[0:2], x, flight_point[2:]))
@@ -85,28 +69,10 @@ def make_lq_plots(opt_path, case, show_error,saveit, do_meas_noise=False, do_pro
     u_lower = np.array([thrust_lb, elev_lb])
 
     # Simulate the system's LQ tracking
-    t_opt, x_opt, xref_opt, u_opt, error_opt = lqr_ref_track(A,B,case,Tf=Tf,u_ub = u_upper,u_lb=u_lower, do_meas_noise=do_meas_noise, do_proc_noise=do_proc_noise)
-
-    # Compute the L2 norm of the control input
-    # u_l2_norm = np.linalg.norm(u_hist)
-    # print("L2 norm of u(t):", u_l2_norm)
-
-    # The actual LQ cost
-    # lq_cost = np.zeros(t.shape)
-    # for i, ti in enumerate(t):
-    #     x_err = x[:,i] - xref_hist[:,i]
-    #     x_err = x_err.reshape((n,1))
-    #     lq_cost[i] = x_err.T @ Q @ x_err + u_hist[:,i].T @ R @ u_hist[:,i]
-
-    # J = trapezoid(lq_cost,t)
-    # print("Actual LQ cost J:", J)
+    t_opt, x_opt, xref_opt, u_opt, error_opt = lqr_ref_track(A,B,case,Tf=Tf,u_ub = u_upper,u_lb=u_lower)
 
     u_l2_norm_opt = np.sqrt(trapezoid(np.sum(u_opt**2,axis=0),t_opt))
     u_l2_norm_init = np.sqrt(trapezoid(np.sum(u_init**2,axis=0),t_init))
-    # print("L2 norm of u(t):", u_l2_norm)
-
-    # print(f"L2 norm of initial tracking error: {error_init}")
-    # print(f"L2 norm of optimized tracking error: {error_opt}")
 
     #%% Plotting only some states
 
@@ -138,10 +104,6 @@ def make_lq_plots(opt_path, case, show_error,saveit, do_meas_noise=False, do_pro
     plt.legend(loc='best')  # Set legend location to center right
     plt.grid(True)
 
-    if show_error:
-        error_caption = f"Optimal tracking error: {error_opt}, initial tracking error: {error_init}, decrease of: {(error_init-error_opt)/error_init * 100:.2f}%."
-        plt.figtext(0.5, 0.8, error_caption, wrap=True, horizontalalignment='center', fontsize=15)
-
     # Plot 5: Control input
     # only one input...
     plt.subplot(2, 1, 2)
@@ -158,23 +120,13 @@ def make_lq_plots(opt_path, case, show_error,saveit, do_meas_noise=False, do_pro
     plt.tight_layout()
 
     # Add a text box with the L2 norms below the plot
-    if show_error:
-        caption = f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}"
-        plt.figtext(0.4, 0.3, caption, wrap=True, horizontalalignment='center', fontsize=15)
+    caption = f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}"
+    plt.figtext(0.4, 0.3, caption, wrap=True, horizontalalignment='center', fontsize=15)
 
-    if saveit:
-        # Save it to the normal location and save it to the paper too.
-        plt.savefig(f'{opt_path}/Tracking/{figname}')
-        # path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/THE_PAPER/Reachability Paper/Figures/Tracking'
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures/Tracking'
-        plt.savefig(f'{path_to_paper}/{figname}')
-    else:
-        print(f'Showing {model_type} for case {case}')
-        print(f'Optimized tracking error: {error_opt}, initial tracking error: {error_init}, change of: {(error_init-error_opt)/error_init*100:.2f}%')
-        print(f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}, change of: {(u_l2_norm_init-u_l2_norm_opt)/u_l2_norm_init*100:.2f}")
-        plt.show()
-    
-    return init_dict, t_opt, x_opt, u_opt, np.tile(trim_point.reshape(-1,1),t_opt.size)
+    print(f'Showing {model_type} for case {case}')
+    print(f'Optimized tracking error: {error_opt}, initial tracking error: {error_init}, change of: {(error_init-error_opt)/error_init*100:.2f}%')
+    print(f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}, change of: {(u_l2_norm_init-u_l2_norm_opt)/u_l2_norm_init*100:.2f}")
+    plt.show()
 
 if __name__ == "__main__":
     opt_path2 = "Output/aero_7dim_asym/N6_110max"
@@ -183,13 +135,7 @@ if __name__ == "__main__":
     models = [opt_path1, opt_path2, opt_path3]
 
     cases = ['pitch','velocity']
-    error = False
-    saveit = False
-    do_meas_noise = False
-    do_proc_noise = False  # This one seems to make for more interesting results. Might need to debug the other case if desired.
-    
-    sim_data = {'initial':{}}
 
     for file in models:
         for case in cases:
-            init_dict, t,x,u,tp = make_lq_plots(file,case,error,saveit,do_meas_noise,do_proc_noise)
+            make_lq_plots(file,case)

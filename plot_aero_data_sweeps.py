@@ -2,8 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from textwrap import wrap
 
-saveit = 0
-
 aero_arrays = np.load('Aero_data/aero_7dim2.npz')
 
 PL = aero_arrays['PL']
@@ -74,7 +72,7 @@ if randomize:
 # indices[2] = 2
 
 # speed to 200 m/s
-indices[0] = 3
+# indices[0] = 3
 
 #chs ~5 m
 # indices[2] = 3
@@ -89,13 +87,8 @@ X = array_names[sweep_pair[0]][indices]
 Y = array_names[sweep_pair[1]][indices]
 
 
-Z = Z_alpha[indices]/1000
+Z = Fx[indices]/1000
 output_label = "Forces in $x$-axis [kN]"
-
-Z = Di[indices]
-
-output_label = "Derivative of $z$-forces w.r.t. AOA [ton/s]"
-
 
 plt.rcParams.update({
     "text.usetex": True,
@@ -118,17 +111,10 @@ print(f'ER: {ERL[tuple(indices)]}')
 plt.figure(figsize=(8, 6))
 im = plt.pcolormesh(X, Y, Z, shading='auto', cmap='viridis')
 
-if saveit:
-    plt.xlabel('Elevator rotation angle, $\delta_e$ [rad]')
-    plt.ylabel('Pitch angle, $\\theta$ [rad]')
-    # plt.title('Forces in $x$, $F_x$, as a function of elevator rotation and pitch')
-    plt.colorbar(im, label='Forces in $x$-axis, $F_x$ [kN]')
-    plt.savefig('aero_sample.png', dpi=300)
-else:
-    plt.xlabel(sweep_pair[0].title())
-    plt.ylabel(sweep_pair[1].title())
-    plt.title("\n".join(wrap(f'{output_label} as function of {sweep_pair[0]} and {sweep_pair[1]}')))
-    plt.colorbar(im, label=f'{output_label}')
+plt.xlabel(sweep_pair[0].title())
+plt.ylabel(sweep_pair[1].title())
+plt.title("\n".join(wrap(f'{output_label} as function of {sweep_pair[0]} and {sweep_pair[1]}')))
+plt.colorbar(im, label=f'{output_label}')
 
 plt.tight_layout()
 plt.show()

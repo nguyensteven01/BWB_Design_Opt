@@ -1,9 +1,8 @@
 
 import numpy as np
-from nonlinear_model import nonlinear_track_velocity, plotit, niceplot
+from nonlinear_model import nonlinear_track_velocity
 from read_hdf5 import extract_dataset_from_results
 from plotters import niceplot_one_at_a_time, error_bars
-
 
 if __name__ == "__main__":
     # Test the nonlinear model by integrating it forward in time.
@@ -38,7 +37,6 @@ if __name__ == "__main__":
     model_type = 'initial'
     t,x,u_hist,tp_hist = nonlinear_track_velocity(np.array([chs,whs]),np.array([speed1,climb_angle1]), 
                                           np.array([speed2,climb_angle2]),data_file, tf,switch_time=st)
-    # plotit(t,x,u_hist,ref=tp_hist,bound=False,model=model_type, save=savefig)
 
     sim_data['initial'] = {
         't': t,
@@ -67,7 +65,6 @@ if __name__ == "__main__":
 
         t,x,u_hist,tp_hist = nonlinear_track_velocity(np.array([chs,whs]),np.array([speed1,climb_angle1]), 
                                           np.array([speed2,climb_angle2]),data_file, tf,switch_time=st)
-        # plotit(t,x,u_hist,ref=tp_hist,bound=False,model=model_type, save=savefig)
 
         if model_type == 'volmax':
             # key = 'vm'
@@ -95,4 +92,4 @@ if __name__ == "__main__":
 
     for key, item in sim_data.items():
         if key != 'initial' and key != 'ref':
-            niceplot_one_at_a_time(sim_data,key, save=savefig)
+            niceplot_one_at_a_time(sim_data,key)

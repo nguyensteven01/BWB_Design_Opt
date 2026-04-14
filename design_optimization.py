@@ -1,13 +1,11 @@
-from scipy import integrate
 from scipy.linalg import expm
 from pyslsqp import optimize
 from pyslsqp.postprocessing import print_dict_as_table
 from interpolatory_model import *
 import numpy as np
 import csv
-import math
 from compute_inf_reach_set import compute_inf_reach_set_sphere
-from p_set_functions import compute_hull, compute_percentage_under, find_best_lgrid
+from reach_set_functions import compute_hull
 from functools import partial
 from read_hdf5 import extract_dataset_from_results
 from trim_aircraft import compute_trim_eom
@@ -48,26 +46,12 @@ def scaled_volume_obj(x, flight_point):
     hull_vol = volume_obj(x, flight_point)
     return hull_vol * 1e2  # Scale to make optimization easier
 
-def gram_integrand(t,A,B):
-    return expm(A * (1-t)) @ B @ np.transpose(B) @ expm(np.transpose(A) * (1-t))
-
-# def gramian(x,flight_point):
-#     # First construct A,B matrices
-#     data_file = 'Aero_data/aero_5dim_full.npz'
-#     interp_dict = aero_interps(data_file)
-#     full_flight_point = np.concatenate((flight_point[0:3], x, flight_point[3:]))
-#     A,B = build_AB(interp_dict,full_flight_point)
-#     # Use A, B matrices to compute the reach gramian
-#     gram, err = integrate.quad_vec(gram_integrand, 0, 5, args=(A,B)) # Integrate the gramian integrand from 0 to 1
-#     return gram
-
 def set_hull(x,desired_vel):
-    ''' This function computes the A,B matrices of the system, computes the p-norm reach set, and returns the convex hull of the points.
-    It will also save the data from the p-set computation into Outputs/reach_data.csv if desired
+    ''' This function computes the A,B matrices of the system, computes the reach set, and returns the convex hull of the points.
+    It will also save the data from the reach set computation into a csv if desired
 
     Input: x: array of design variables, where x[0] = center halfspan of bwb, x[1] = wing halfspan of bwb, 
-    flight_point is the trim [V, pitch, er]. We will add chs and whs into this array. 
-    But maybe now flight_point is just going to become velocity.
+    desired_vel is the desired trim velocity. 
     
     Output: reachable set hull: scipy.spatial.ConvexHull object'''
 
@@ -95,19 +79,10 @@ def set_hull(x,desired_vel):
     full_flight_point = np.concatenate((flight_point[0:2], x, flight_point[2:]))
     A,B = build_AB(interp_dict,full_flight_point)
 
-    # If we want to see the A,B matrices
-    # print(f'A: {A}')
-    # print(f'B: {B}')
-
     tf = 1
-    
-    # This sets the size of the hypercube we sample for costate
-    l_grid = 0.8
-
     N_res = 6     # Resolution for the costate sampling
 
     # With this, actually compute the set
-    # control_cost, final_positions = compute_inf_reach_set(A,B,tf,N_res,l_grid,u_ub = u_upper, u_lb = u_lower,save_data=False,filename='Output/bwb_inf_data.csv')
     control_cost, final_positions = compute_inf_reach_set_sphere(A,B,tf,N_res,u_ub = u_upper, u_lb = u_lower, \
                                                                  save_data=False,filename='Output/bwb_inf_data.csv')
 
@@ -130,15 +105,11 @@ def vol_constraint(x,flight_point):
     return np.array([100*hull.volume - 5*init_vol]) 
 
 def compute_axis_extent(x,v,fp):
-    ''' This constraint computes the length of the p-norm reach set projected along a given direction.
-    Initial length along [0,0,0,1] is...
-    
-    Going to also try checking along [0,1,0,0]...'''
+    ''' This constraint computes the length of the p-norm reach set projected along a given direction.'''
     hull = set_hull(x,fp)
 
     # Define axis for projection
     axis = v
-    # ensure unit vector
     axis = axis/np.linalg.norm(axis)
 
     hull_points = hull.points[hull.vertices]
@@ -146,9 +117,6 @@ def compute_axis_extent(x,v,fp):
 
     # Compute min and max position of projections along axis
     proj_min, proj_max = projections.min(), projections.max()
-    
-    # Compute the actual vectors in case of plot
-    line_points = np.concatenate((proj_min * axis, proj_max * axis),axis=1) # Saves min and max as [x_min, x_max]
     extent = proj_max - proj_min
     print(f"Extent along direction {v}: {extent}")
     return extent
@@ -176,35 +144,15 @@ if __name__ == '__main__':
     chs = 5 # m
     whs = 12 # m
     x0 = np.array([chs, whs])
-    
-    # alt0 = 5 # km
-    V0 = 200 # m/s
-    # pitch0 = np.deg2rad(5) # radians
-    # er0 = np.deg2rad(0) # radians
 
-    # flight_params = np.array([V0, pitch0, deltae0])
+    V0 = 200 # m/s
+
     flight_params = V0
 
     # Axis on which to project reachable set during some optimization problems
     v = np.array([[0,0,np.cos(np.deg2rad(110)),np.sin(np.deg2rad(110))]]).T
-    # v = np.array([[0,0,np.cos(np.deg2rad(120)),np.sin(np.deg2rad(120))]]).T
-    # v = np.array([[0,0,1,-1]]).T
 
     init_extent = compute_axis_extent(x0,v,flight_params)
-
-    # This is for just generating csv files of reach data and checking volumes...
-    # output_hdf5_file = "Output/aero_7dim_asym/N6_volmax/opt_vars.hdf5"
-    # x0 = extract_dataset_from_results(output_hdf5_file, "x")
-    # hull = set_hull(x0,V0)
-    # volume_obj(x0,flight_params)
-    # gram = gramian(x0,flight_params)
-    # print(hull.volume)
-    # init_extent = compute_axis_extent(x0,v,flight_params)
-    
-
-    # Using the flight point above, create a function that evaluates Lp constraint, but only takes x0 as input, passing flight_params
-    # every time.
-    # fixed_vol_constraint = partial(vol_constraint,flight_point=V0)
 
     # Partial function for objective functions
     fixed_Lp_objective = partial(volume_obj,flight_point=V0)
@@ -219,29 +167,23 @@ if __name__ == '__main__':
     x_low = np.array([3, 10])
     x_upp = np.array([7,20])            # Use the range that I swept across.
 
-
-    '''This minimizes one norm of design variables (their sum) while ensuring volume of reach set increases 10%.'''
-    # results = optimize(x0, obj=one_norm, meq = num_eqcon, con=fixed_vol_constraint, xl=x_low, xu = x_upp, \
-    #                    visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                     save_itr = 'major', save_filename = 'Output/opt_vars.hdf5')
-    # print_dict_as_table(results)
-
+    output_string = 'Output/aero_7dim_asym'
 
     '''This will purely maximize the volume of reach set with some bounds on design variables. No constraints.'''
-    # results = optimize(x0, obj=fixed_scaled_Lp_obj, meq = num_eqcon, xl=x_low, xu = x_upp, \
-    #                    visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                     save_itr = 'major', save_filename = 'Output/opt_vars.hdf5')
-    # print_dict_as_table(results)
+    results = optimize(x0, obj=fixed_scaled_Lp_obj, meq = num_eqcon, xl=x_low, xu = x_upp, \
+                       visualize = True, save_figname=f"{output_string}/N6_volmax/optimization_progress.png", summary_filename=f"{output_string}/N6_volmax/design_optimization.out", \
+                        save_itr = 'major', save_filename = f'{output_string}/N6_volmax/opt_vars.hdf5')
+    print_dict_as_table(results)
 
     '''Optimize some direction'''
-    # results = optimize(x0, obj=fixed_direction_obj, meq = num_eqcon, con=fixed_direction_con, xl=x_low, xu = x_upp, \
-    #                     visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                         save_itr = 'major', save_filename = 'Output/opt_vars.hdf5') 
-    # print_dict_as_table(results)
+    results = optimize(x0, obj=fixed_direction_obj, meq = num_eqcon, con=fixed_direction_con, xl=x_low, xu = x_upp, \
+                        visualize = True, save_figname=f"{output_string}/N6_110max/optimization_progress.png", summary_filename=f"{output_string}/N6_110max/design_optimization.out", \
+                            save_itr = 'major', save_filename = f'{output_string}/N6_110max/opt_vars.hdf5') 
+    print_dict_as_table(results)
 
     '''Optimized for volume with direction constraint'''
-    # results = optimize(x0, obj=fixed_scaled_Lp_obj, meq = num_eqcon, con=fixed_direction_con, xl=x_low, xu = x_upp, \
-    #                     visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                         save_itr = 'major', save_filename = 'Output/opt_vars.hdf5')
-    # print_dict_as_table(results)
+    results = optimize(x0, obj=fixed_scaled_Lp_obj, meq = num_eqcon, con=fixed_direction_con, xl=x_low, xu = x_upp, \
+                        visualize = True, save_figname=f"{output_string}/N6_volmax_110con/optimization_progress.png", summary_filename=f"{output_string}/N6_volmax_110con/design_optimization.out", \
+                            save_itr = 'major', save_filename = f'{output_string}/N6_volmax_110con/opt_vars.hdf5')
+    print_dict_as_table(results)
     

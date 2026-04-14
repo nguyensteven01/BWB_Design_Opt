@@ -1,11 +1,6 @@
 import numpy as np
-import matplotlib.pyplot as plt
-from textwrap import wrap
 from scipy.interpolate import RegularGridInterpolator
 import math
-
-
-#%% Build function to construct interpolators
 
 def aero_interps(data_file):
     ''' This function will take in the name of the data .npz file and output 
@@ -16,7 +11,6 @@ def aero_interps(data_file):
     PL = aero_arrays['PL']
     WHSL = aero_arrays['WHSL']
     CHSL = aero_arrays['CHSL']
-    # AL = aero_arrays['AL']
     ERL = aero_arrays['ERL']
     ML = aero_arrays['ML']
 
@@ -40,15 +34,7 @@ def aero_interps(data_file):
 
     # Generate the 6 vectors passed into meshgrid.
     shape = PL.shape
-    nparams = len(shape)
     sweep_resolution = shape[0] #Assume grid same resolution all axes
-
-    # alt_list = np.linspace(AL[0,0,0,0,0,0],  AL[-1,0,0,0,0,0],sweep_resolution)
-    # speed_list = np.linspace(ML[0,0,0,0,0,0],ML[0,-1,0,0,0,0],sweep_resolution)
-    # pitch_list = np.linspace(PL[0,0,0,0,0,0],PL[0,0,-1,0,0,0],sweep_resolution)
-    # chs_list = np.linspace(CHSL[0,0,0,0,0,0],CHSL[0,0,0,-1,0,0],sweep_resolution)
-    # whs_list = np.linspace(WHSL[0,0,0,0,0,0],WHSL[0,0,0,0,-1,0],sweep_resolution)
-    # er_list = np.linspace(ERL[0,0,0,0,0,0],  ERL[0,0,0,0,0,-1],sweep_resolution)
 
     speed_list = np.linspace(ML[0,0,0,0,0],ML[-1,0,0,0,0],sweep_resolution)
     pitch_list = np.linspace(PL[0,0,0,0,0],PL[0,-1,0,0,0],sweep_resolution)
@@ -93,9 +79,6 @@ def build_AB(interpolators, flight_point):
             flight_point is an array of the 6 state/control variables at the flight point.
             
             More specifically, flight_point gives [V, alpha, chs, whs, er]
-            In a lot of my examples, we assume 0 flight path angle, so alpha = pitch. But really,
-            The angle of attack is what the panel method code cares about, and that's what should be passed
-            into the interpolators.
 
     Outputs: A,B matrices at the selected point'''
 
@@ -150,10 +133,3 @@ def build_AB(interpolators, flight_point):
     B[3, 1] = 0
 
     return A,B
-
-
-if __name__ == "__main__":
-    data_file = 'Aero_data/aero_7dim.npz'
-    interp_dict = aero_interps(data_file)
-
-    

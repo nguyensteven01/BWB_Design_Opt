@@ -17,7 +17,6 @@ if __name__ == "__main__":
     opt_path1 = 'Output/aero_7dim_asym/N6_volmax'
     opt_path2 = 'Output/aero_7dim_asym/N6_110max'
     models = [opt_path1, opt_path2, opt_path3]
-    # models = [opt_path3]
 
     speed1 = 190
     climb_angle1 = 10
@@ -31,14 +30,11 @@ if __name__ == "__main__":
     tf = 40  # seconds
     st = 20  # switching time
 
-    savefig = False
-
     #%% Testing pitch angle tracker
 
     model_type = 'initial'
     t, x, u_hist, tp_hist = nonlinear_track_pitch(np.array([chs, whs]), np.array([speed1, climb_angle1]), 
                                                    np.array([speed2, climb_angle2]), data_file, tf, switch_time=st)
-    # plotit(t,x,u_hist,ref=tp_hist,bound=False,model=model_type, save=savefig)
 
     sim_data['initial'] = {
         't': t,
@@ -88,8 +84,8 @@ if __name__ == "__main__":
             'name':key
         }
 
-    error_bars(sim_data,save=savefig)
+    error_bars(sim_data)
 
     for key, item in sim_data.items():
         if key != 'initial' and key != 'ref':
-            niceplot_one_at_a_time(sim_data,key, save=savefig)
+            niceplot_one_at_a_time(sim_data,key)

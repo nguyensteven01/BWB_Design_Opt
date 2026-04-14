@@ -5,19 +5,13 @@
 
 from design_optimization import *
 import numpy as np
-from scipy.integrate import solve_ivp, trapezoid, quad_vec
-from scipy.linalg import inv, expm
+from scipy.integrate import  trapezoid
 import matplotlib.pyplot as plt
-from scipy.interpolate import RegularGridInterpolator
 from read_hdf5 import extract_dataset_from_results
-import control as ct
 from ref_trackers import integral_ref_track
 
 #%% Build system matrices, cost matrices, time horizon
-def make_integral_plots(opt_path, case, show_error, saveit):
-
-    do_meas_noise = False
-    do_proc_noise = False
+def make_integral_plots(opt_path, case):
 
     # Import Aero Data
     aero_data_file = 'Aero_data/aero_7dim2.npz'
@@ -29,11 +23,9 @@ def make_integral_plots(opt_path, case, show_error, saveit):
     whs = x[1]
 
     # Flight point
-    # alt0 = 10 # km
     V0 = 200 # m/s
     alpha0, er0, deltaT0, pitch0 = compute_trim_eom(np.asarray([V0,chs,whs]), aero_data_file,climb_angle=0)
     flight_point = np.array([V0, alpha0, er0])
-    # print(f'Initial trimmed alpha: {np.rad2deg(alpha0)}, deltae: {np.rad2deg(er0)}, deltaT: {deltaT0}, pitch: {np.rad2deg(pitch0)}')
 
     Tf = 5
 
@@ -48,7 +40,7 @@ def make_integral_plots(opt_path, case, show_error, saveit):
     u_upper = np.array([thrust_ub, elev_ub])
     u_lower = np.array([thrust_lb, elev_lb])
 
-    t_init, x_init, xref_init, u_init, error_init = integral_ref_track(A,B,case,Tf=Tf,u_lb = u_lower, u_ub = u_upper, do_meas_noise=do_meas_noise, do_proc_noise=do_proc_noise)
+    t_init, x_init, xref_init, u_init, error_init = integral_ref_track(A,B,case,Tf=Tf,u_lb = u_lower, u_ub = u_upper)
 
     # Optimized design
     output_hdf5_file = f"{opt_path}/opt_vars.hdf5"
@@ -57,10 +49,8 @@ def make_integral_plots(opt_path, case, show_error, saveit):
     whs = x[1]
     alpha0, er0, deltaT0, pitch0 = compute_trim_eom(np.asarray([V0,chs,whs]), aero_data_file,climb_angle=0)
     flight_point = np.array([V0, alpha0, er0])
-    # print(f'Optimized trimmed alpha: {np.rad2deg(alpha0)}, deltae: {np.rad2deg(er0)}, deltaT: {deltaT0}, pitch: {np.rad2deg(pitch0)}')
 
     model_type = opt_path.split('/')[-1][3:]
-    figname = f'{model_type}_integral_{case}_compare'
 
     full_flight_point = np.concatenate((flight_point[0:2], x, flight_point[2:]))
     A,B = build_AB(interp_dict,full_flight_point)
@@ -74,7 +64,7 @@ def make_integral_plots(opt_path, case, show_error, saveit):
     u_upper = np.array([thrust_ub, elev_ub])
     u_lower = np.array([thrust_lb, elev_lb])
 
-    t_opt, x_opt, xref_opt, u_opt, error_opt = integral_ref_track(A,B,case,Tf=Tf,u_lb = u_lower,u_ub = u_upper, do_meas_noise=do_meas_noise, do_proc_noise=do_proc_noise)
+    t_opt, x_opt, xref_opt, u_opt, error_opt = integral_ref_track(A,B,case,Tf=Tf,u_lb = u_lower,u_ub = u_upper)
 
     u_l2_norm_opt = np.sqrt(trapezoid(np.sum(u_opt**2,axis=0),t_opt))
     u_l2_norm_init = np.sqrt(trapezoid(np.sum(u_init**2,axis=0),t_init))
@@ -109,9 +99,9 @@ def make_integral_plots(opt_path, case, show_error, saveit):
     plt.legend(loc='best')  # Set legend location to center right
     plt.grid(True)
 
-    if show_error:
-        error_caption = f"Optimal tracking error: {error_opt}, initial tracking error: {error_init}"
-        plt.figtext(0.5, 0.8, error_caption, wrap=True, horizontalalignment='center', fontsize=15)
+    # if show_error:
+    #     error_caption = f"Optimal tracking error: {error_opt}, initial tracking error: {error_init}"
+    #     plt.figtext(0.5, 0.8, error_caption, wrap=True, horizontalalignment='center', fontsize=15)
 
     # Plot 5: Control input
     plt.subplot(2, 1, 2)
@@ -127,21 +117,10 @@ def make_integral_plots(opt_path, case, show_error, saveit):
     # Adjust layout and show the figure
     plt.tight_layout()
 
-    # Add a text box with the L2 norms below the plot
-    if show_error:
-        caption = f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}"
-        plt.figtext(0.4, 0.3, caption, wrap=True, horizontalalignment='center', fontsize=15)
-
-    if saveit:
-        # Save it to the paper and to the normal location.
-        plt.savefig(f'{opt_path}/Tracking/{figname}')
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures/Tracking'
-        plt.savefig(f'{path_to_paper}/{figname}')
-    else:
-        print(f'Showing {model_type} for case {case}')
-        print(f'Optimized tracking error: {error_opt}, initial tracking error: {error_init}, change of: {(error_init-error_opt)/error_init*100:.2f}%')
-        print(f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}, change of: {(u_l2_norm_init-u_l2_norm_opt)/u_l2_norm_init*100:.2f}%")
-        plt.show()
+    print(f'Showing {model_type} for case {case}')
+    print(f'Optimized tracking error: {error_opt}, initial tracking error: {error_init}, change of: {(error_init-error_opt)/error_init*100:.2f}%')
+    print(f"Opt control signal: {u_l2_norm_opt:.4f}, init control signal: {u_l2_norm_init:.4f}, change of: {(u_l2_norm_init-u_l2_norm_opt)/u_l2_norm_init*100:.2f}%")
+    plt.show()
 
 if __name__ == "__main__":
     opt_path2 = "Output/aero_7dim_asym/N6_110max"
@@ -151,9 +130,6 @@ if __name__ == "__main__":
 
     cases = ['pitch','velocity']
 
-    error = False
-    saveit = False
-
     for file in models:
         for case in cases:
-            make_integral_plots(file,case,error,saveit)
+            make_integral_plots(file,case)

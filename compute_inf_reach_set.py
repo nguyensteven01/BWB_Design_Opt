@@ -1,12 +1,8 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 from scipy.linalg import expm
-from scipy.integrate import trapezoid
 import pandas as pd
 from progress_bar import printProgressBar
-from p_set_functions import compute_hull, find_best_lgrid, plot_columns
-from p_set_data_read import unpack_p_set_data
-import matplotlib.pyplot as plt
 
 '''This script will sample costate initial conditions and then simulate trajectories
 corresponding to controls of sufficiently low cost. The final states, control costs,
@@ -57,19 +53,6 @@ def compute_inf_reach_set_sphere(A,B,tf,N_res,u_ub = [1,1], u_lb = [-1,-1],save_
     sample_num = N_res**n
     lx = sample_sphere_boundary(sample_num)
 
-    # Create the grid for each dimension
-    # lx1 = np.linspace(-l_grid, l_grid, N_res)
-    # lx2 = np.linspace(-l_grid, l_grid, N_res)
-    # lx3 = np.linspace(-l_grid, l_grid, N_res)
-    # lx4 = np.linspace(-l_grid, l_grid, N_res)
-
-    # # Create a 4D meshgrid
-    # LX1, LX2, LX3, LX4 = np.meshgrid(lx1, lx2, lx3, lx4)
-
-    # Initialize arrays to store control costs and final positions
-    # control_cost = np.zeros((N_res, N_res, N_res, N_res))
-    # final_positions = np.zeros((N_res, N_res, N_res, N_res, 4))  # 4D positions
-
     control_cost = np.zeros((sample_num,1))
     final_positions = np.zeros((sample_num,n))
 
@@ -118,29 +101,5 @@ def compute_inf_reach_set_sphere(A,B,tf,N_res,u_ub = [1,1], u_lb = [-1,-1],save_
         print(f"\nData saved to {filename}")
 
     return control_cost, final_positions
-
-
-if __name__ == "__main__":
-
-    A = np.identity(4)
-    A= np.array([[-0.00352121133,  5.87480073,  0, -9.81],
-                 [-0.000681553965, -0.520980253,  1, 0],
-                 [0, -2.63577136,  0,  0],
-                 [ 0,  0,  1,  0]])
-    B = np.array([[2.84071645, 0.32619862],
-                  [0.        , 0.06223328],
-                  [0.        , 1.75401816],
-                  [0.        ,0.        ]])
-
-    tf = 1
-    N_res = 6
-    l_grid = 5
-
-    control_cost, final_positions = compute_inf_reach_set_sphere(A, B, tf, N_res, save_data=True,filename='test_sphere.csv')
-    # LX1, LX2, LX3, LX4, control_cost, final_positions = unpack_p_set_data("reach_data_opt.csv",N_res)
-
-    # hull = compute_hull(control_cost, final_positions, 1)
-    # print(f"Computed Volume of Reachable Set: {hull.volume}")
-
 
 

@@ -1,6 +1,5 @@
 import numpy as np
-from p_set_functions import compute_hull, plot_hull_projection
-from p_set_data_read import unpack_p_set_data
+from reach_set_functions import compute_hull, plot_hull_projection, unpack_reach_set_data
 import matplotlib.pyplot as plt
 # from design_optimization import Lp_direction_constraint
 
@@ -21,8 +20,8 @@ def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True):
     opt_csv_file = f'{opt_path}/bwb_inf_data.csv'
     # opt_csv_file = 'test.csv'
 
-    l10, l20, l30, l40, cc0, fp0 = unpack_p_set_data(init_csv_file,N_res)
-    l11, l21, l31, l41, cc1, fp1 = unpack_p_set_data(opt_csv_file,N_res)
+    l10, l20, l30, l40, cc0, fp0 = unpack_reach_set_data(init_csv_file,N_res)
+    l11, l21, l31, l41, cc1, fp1 = unpack_reach_set_data(opt_csv_file,N_res)
 
     hull0 = compute_hull(cc0,fp0,1)
     hull1 = compute_hull(cc1,fp1,1)

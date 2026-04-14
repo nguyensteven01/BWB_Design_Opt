@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.integrate import trapezoid
 
-def niceplot_one_at_a_time(sim_dictionary,model,save=False):
+def niceplot_one_at_a_time(sim_dictionary,model):
     ''' This function makes a nicer looking plot for the simulation trajectories
     between the initial and an optimized model that is fed in.
     No error bar plots since we only look at one model at a time.'''
@@ -18,11 +18,6 @@ def niceplot_one_at_a_time(sim_dictionary,model,save=False):
     tp_init = sim_dictionary['initial']['tp']
     style_init = sim_dictionary['initial']['style']
     color_init = sim_dictionary['initial']['color']
-    
-    # t_ref = sim_dictionary['ref']['t']
-    # x_ref = sim_dictionary['ref']['x']
-    # style_ref = sim_dictionary['ref']['style']
-    # color_ref = sim_dictionary['ref']['color']
 
     t_opt = sim_dictionary[model]['t']
     x_opt = sim_dictionary[model]['x']
@@ -40,7 +35,6 @@ def niceplot_one_at_a_time(sim_dictionary,model,save=False):
     plt.subplot(5, 1, 1)
     plt.plot(t_init, x_init[0, :], label='Initial', color=color_init, linestyle=style_init)
     plt.plot(t_opt, x_opt[0, :], label=name.upper(), color = color_opt, linestyle=style_opt)
-    # plt.plot(t_ref, x_ref[0,:], label='Reference', linestyle=style_ref, color=color_ref)
     plt.legend(loc='best')  # Set legend location to center right
     plt.grid(True)
     plt.ylabel('Perturbed Airspeed\n [m/s] ($V - V_0$)')
@@ -49,7 +43,6 @@ def niceplot_one_at_a_time(sim_dictionary,model,save=False):
     plt.subplot(5,1,2)
     plt.plot(t_init, np.rad2deg(x_init[1, :]), label='Initial', color=color_init, linestyle=style_init)
     plt.plot(t_opt,   np.rad2deg(x_opt[1, :]), label=name.upper(), color = color_opt, linestyle=style_opt)
-    # plt.plot(t_ref,  np.rad2deg(x_ref[1,:]), label='Reference', linestyle=style_ref, color=color_ref)
     plt.grid(True)
     plt.ylabel('Perturbed Angle of\n Attack [deg]\n ($\\alpha - \\alpha_0$)')
 
@@ -57,7 +50,6 @@ def niceplot_one_at_a_time(sim_dictionary,model,save=False):
     plt.subplot(5, 1, 3)
     plt.plot(t_init, np.rad2deg(x_init[2, :]), label='Initial', color=color_init, linestyle=style_init)
     plt.plot(t_opt,   np.rad2deg(x_opt[2, :]), label=name.upper(), color = color_opt, linestyle=style_opt)
-    # plt.plot(t_ref,  np.rad2deg(x_ref[2,:]), label='Reference', linestyle=style_ref, color=color_ref)
     plt.grid(True)
     plt.ylabel('Perturbed Pitch Rate\n [deg/s] ($\dot{\\theta} - \dot{\\theta}_0$)')
 
@@ -65,17 +57,16 @@ def niceplot_one_at_a_time(sim_dictionary,model,save=False):
     plt.subplot(5, 1, 4)
     plt.plot(t_init, np.rad2deg(x_init[3, :]), label='Initial', color=color_init, linestyle=style_init)
     plt.plot(t_opt,   np.rad2deg(x_opt[3, :]), label=name.upper(), color = color_opt, linestyle=style_opt)
-    # plt.plot(t_ref,  np.rad2deg(x_ref[3,:]), label='Reference', linestyle=style_ref, color=color_ref)
     plt.ylabel('Perturbed Pitch angle\n [deg] ($\\theta - \\theta_0$)')
     plt.grid(True)
 
     # Plot 5: Control input
     # only one input...
     plt.subplot(5, 1, 5)
-    plt.plot(t_init, u_init[0, :], label='$\delta_{th}$ Initial', color=color_init, linestyle='dashdot'         )#,marker='^',markevery=0.1)
-    plt.plot(t_init, u_init[1, :], label='$\delta_e$ Initial [rad]', color=color_init, linestyle='solid',marker='o',markevery=0.1  )#,marker='o',markevery=0.1)
-    plt.plot(t_opt, u_opt[0, :], label='$\delta_{th}$ Optimized', color=color_opt, linestyle='dashdot'          )#,marker='^',markevery=0.1)
-    plt.plot(t_opt, u_opt[1, :], label='$\delta_e$ Optimized [rad]', color=color_opt, linestyle='solid',marker='o',markevery=0.1   )#,marker='o',markevery=0.1)
+    plt.plot(t_init, u_init[0, :], label='$\delta_{th}$ Initial', color=color_init, linestyle='dashdot'         )
+    plt.plot(t_init, u_init[1, :], label='$\delta_e$ Initial [rad]', color=color_init, linestyle='solid',marker='o',markevery=0.1  )
+    plt.plot(t_opt, u_opt[0, :], label='$\delta_{th}$ Optimized', color=color_opt, linestyle='dashdot'          )
+    plt.plot(t_opt, u_opt[1, :], label='$\delta_e$ Optimized [rad]', color=color_opt, linestyle='solid',marker='o',markevery=0.1   )
     plt.xlabel('time [s]')
     plt.ylabel('Control', wrap=True)
     plt.legend(loc='center right')  # Set legend location to center right
@@ -84,16 +75,10 @@ def niceplot_one_at_a_time(sim_dictionary,model,save=False):
     # Adjust layout and show the figure
     plt.tight_layout()
 
-    if save:
-        figname = f'{model}_nonlinear_track'
-        plt.savefig(f'Output/aero_7dim_asym/Nonlinear_Pitch_Integrator/{figname}.png', dpi=300)
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures/Tracking'
-        plt.savefig(f'{path_to_paper}/{figname}')
-    else:
-        plt.show()
+    plt.show()
 
 
-def error_bars(sim_dictionary,save=False):
+def error_bars(sim_dictionary):
     ''' This function makes error bars to compare the models'''
 
     plt.figure(figsize=(8,6))
@@ -198,10 +183,4 @@ def error_bars(sim_dictionary,save=False):
     plt.xticks(x_pos, [m.upper() for m in models_list_label])
     plt.legend(loc='best')
     plt.grid(True, axis='y')
-    if save:
-        figname = 'error_nonlinear'
-        plt.savefig(f'Output/aero_7dim_asym/Nonlinear_Pitch_Integrator/{figname}.png', dpi=300)
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures/Tracking'
-        plt.savefig(f'{path_to_paper}/{figname}')
-    else:
-        plt.show()
+    plt.show()
