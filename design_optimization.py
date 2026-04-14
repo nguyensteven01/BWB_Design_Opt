@@ -4,7 +4,7 @@ from pyslsqp.postprocessing import print_dict_as_table
 from interpolatory_model import *
 import numpy as np
 import csv
-from compute_inf_reach_set import compute_inf_reach_set_sphere
+from compute_inf_reach_set import compute_inf_reach_set
 from reach_set_functions import compute_hull
 from functools import partial
 from read_hdf5 import extract_dataset_from_results
@@ -83,7 +83,7 @@ def set_hull(x,desired_vel):
     N_res = 6     # Resolution for the costate sampling
 
     # With this, actually compute the set
-    control_cost, final_positions = compute_inf_reach_set_sphere(A,B,tf,N_res,u_ub = u_upper, u_lb = u_lower, \
+    control_cost, final_positions = compute_inf_reach_set(A,B,tf,N_res,u_ub = u_upper, u_lb = u_lower, \
                                                                  save_data=False,filename='Output/bwb_inf_data.csv')
 
     # Next, take the convex hull of the points in final_positions, computing inclusion based on control cost.

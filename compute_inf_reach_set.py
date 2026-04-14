@@ -8,7 +8,7 @@ from progress_bar import printProgressBar
 corresponding to controls of sufficiently low cost. The final states, control costs,
 and costate initial condition grid will be output into a csv file.'''
 
-def compute_inf_reach_set_sphere(A,B,tf,N_res,u_ub = [1,1], u_lb = [-1,-1],save_data=False,filename="Output/reachability_data.csv"):
+def compute_inf_reach_set(A,B,tf,N_res,u_ub = [1,1], u_lb = [-1,-1],save_data=False,filename="Output/reachability_data.csv"):
     '''This function computes the reachable set of a continuous-time LTI system
     , where the control is chosen to satisfy some magnitude bound from [0,T].
 
