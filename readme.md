@@ -1,6 +1,8 @@
 # Reachability-Based Design Optimization for a Blended Wing Body Aircraft
 
-This repository contains the Python codebase accompanying the paper. The code implements a reachability-based framework for optimizing the longitudinal design parameters of a Blended Wing Body (BWB) aircraft, using control-theoretic tools including LQR tracking, reachable set computation, and nonlinear simulation.
+This repository contains the Python codebase accompanying a paper we have submitted to AIAA Journal. The code implements a reachability-based framework for optimizing the longitudinal design parameters of a Blended Wing Body (BWB) aircraft, using control-theoretic tools including LQR tracking, reachable set computation, and nonlinear simulation.
+
+Distribution A: Approved for public release; distribution unlimited. Case no. AFRL-2026-1943.
 
 ---
 
