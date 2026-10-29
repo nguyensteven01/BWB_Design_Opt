@@ -171,40 +171,12 @@ def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True, scatteron=
         plt.show()
 
 if __name__ == "__main__":
-    # opt_path1 = "Output/5_dec_vars/N6_volmax"
-    # opt_path2 = "Output/5_dec_vars/N6_115max"
-    # opt_path3 = "Output/5_dec_vars/N6_volmax_115con"
+    opt_path1 = "Output/5_dec_vars/N6_volmax"
+    opt_path2 = "Output/5_dec_vars/N6_115max"
+    opt_path3 = "Output/5_dec_vars/N6_volmax_115con"
 
-    # models = [opt_path1, opt_path2, opt_path3]
+    models = [opt_path1, opt_path2, opt_path3]
 
-    sm = 0.04
-    if sm == 0:
-        opt_path1 = 'Output/5_dec_vars/N6_volmax'
-        opt_path2 = 'Output/5_dec_vars/N6_115max'
-        opt_path3 = 'Output/5_dec_vars/N6_volmax_115con'
-        models = [opt_path1, opt_path2, opt_path3]
-    elif sm == 0.04:
-        opt_path1 = 'Output/5_dec_vars/10-22-26/N6_volmax_sm4'
-        opt_path2 = 'Output/5_dec_vars/10-22-26/N6_90max_sm4'
-        opt_path3 = 'Output/5_dec_vars/10-29-26/N6_volmax_90con_sm4'
-        models = [opt_path1, opt_path2, opt_path3]
-    elif sm == 0.02:
-        opt_path1 = 'Output/5_dec_vars/10-23-26/N6_volmax_sm2'
-        opt_path2 = 'Output/5_dec_vars/10-23-26/N6_115max_sm2'
-        opt_path3 = 'Output/5_dec_vars/10-23-26/N6_90max_sm2'
-        models = [opt_path1, opt_path2, opt_path3]
-    elif sm == 0.01:
-        opt_path1 = 'Output/5_dec_vars/10-21-26/N6_volmax_sm1'
-        opt_path2 = 'Output/5_dec_vars/10-21-26/N6_115max_sm1'
-        models = [opt_path1, opt_path2]
-    elif sm == 0.03:
-        opt_path1 = 'Output/5_dec_vars/10-19-26/N6_volmax_sm3'
-        opt_path2 = 'Output/5_dec_vars/10-19-26/N6_115max_sm3'
-        models = [opt_path1, opt_path2]
-    elif sm == 0.01:
-        opt_path1 = 'Output/5_dec_vars/10-21-26/N6_volmax_sm1'
-        opt_path2 = 'Output/5_dec_vars/10-21-26/N6_115max_sm1'
-        models = [opt_path1, opt_path2]
 
     init_file = "Output/5_dec_vars/N6_initial/bwb_inf_data.csv"
 

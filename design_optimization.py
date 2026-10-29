@@ -1,11 +1,9 @@
-from scipy import integrate
 from scipy.linalg import expm
 from pyslsqp import optimize
 from pyslsqp.postprocessing import print_dict_as_table
 from utils.interpolatory_model import *
 import numpy as np
 import csv
-import math
 from utils.compute_inf_reach_set import compute_inf_reach_set_sphere
 from utils.reach_set_functions import compute_hull
 from functools import partial
@@ -13,9 +11,7 @@ from utils.read_hdf5 import extract_dataset_from_results
 from utils.trim_aircraft import compute_trim_eom
 from scipy.optimize import linprog
 import time
-from process_plot_data import plot_the_sets
 import pandas as pd
-from utils.reach_set_functions import plot_projected_boundary, sample_ellipsoid_surface
 
 from utils.gramian_metrics import *
 
@@ -523,18 +519,6 @@ if __name__ == '__main__':
     # results = optimize(x0, obj=fixed_gram_eig_obj, meq = num_eqcon, con=fixed_stab_con, xl=x_low, xu = x_upp, \
     #                     visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
     #                         save_itr = 'major', save_filename = 'Output/opt_vars.hdf5') 
-    # print_dict_as_table(results)
-
-    '''Optimize lift/drag ratio'''
-    # results = optimize(x0, obj=fixed_lift_drag, meq = num_eqcon, xl=x_low, xu = x_upp, \
-    #                     visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                         save_itr = 'major', save_filename = 'Output/opt_vars.hdf5') 
-    # print_dict_as_table(results)
-
-    '''Optimized for volume of rate limited set'''
-    # results = optimize(x0, obj=fixed_scaled_Lp_obj, meq = num_eqcon, xl=x_low, xu = x_upp, \
-    #                    visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                     save_itr = 'major', save_filename = 'Output/opt_vars.hdf5')
     # print_dict_as_table(results)
 
     output_hdf5_file = "Output/opt_vars.hdf5"

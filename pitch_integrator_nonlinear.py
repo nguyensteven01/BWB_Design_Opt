@@ -6,47 +6,18 @@ from utils.read_hdf5 import extract_dataset_from_results
 from utils.plotters import error_bars, niceplot_3_models_alt
 from utils.transient_errors import transient_errors
 
-from animate.compare_sim_data import animate_sim_data_comparison
-
 if __name__ == "__main__":
     # Test the nonlinear model by integrating it forward in time.
 
     savefig = False
-    make_video = False
     make_plots = True
 
     angle = 115
 
-    sm = 0.02
-    if sm == 0:
-        opt_path1 = 'Output/5_dec_vars/N6_volmax'
-        opt_path2 = 'Output/5_dec_vars/N6_115max'
-        opt_path3 = 'Output/5_dec_vars/N6_volmax_115con'
-        models = [opt_path1, opt_path2, opt_path3]
-    elif sm == 0.04:
-        opt_path1 = 'Output/5_dec_vars/10-22-26/N6_volmax_sm4'
-        opt_path2 = 'Output/5_dec_vars/10-22-26/N6_90max_sm4'
-        # opt_path2 = 'Output/5_dec_vars/10-29-26/N6_115max_sm4'
-        models = [opt_path1, opt_path2]
-    elif sm == 0.02:
-        opt_path1 = 'Output/5_dec_vars/10-23-26/N6_volmax_sm2'
-        opt_path2 = 'Output/5_dec_vars/10-23-26/N6_115max_sm2'
-        # opt_path3 = 'Output/5_dec_vars/10-23-26/N6_90max_sm2'
-        models = [opt_path1, opt_path2]
-    elif sm == 0.01:
-        opt_path1 = 'Output/5_dec_vars/10-21-26/N6_volmax_sm1'
-        opt_path2 = 'Output/5_dec_vars/10-21-26/N6_115max_sm1'
-        models = [opt_path1, opt_path2]
-    elif sm == 0.03:
-        opt_path1 = 'Output/5_dec_vars/10-19-26/N6_volmax_sm3'
-        opt_path2 = 'Output/5_dec_vars/10-19-26/N6_115max_sm3'
-        models = [opt_path1, opt_path2]
-    elif sm == 0.01:
-        opt_path1 = 'Output/5_dec_vars/10-21-26/N6_volmax_sm1'
-        opt_path2 = 'Output/5_dec_vars/10-21-26/N6_115max_sm1'
-        models = [opt_path1, opt_path2]
-
-    
+    opt_path1 = 'Output/5_dec_vars/N6_volmax'
+    opt_path2 = 'Output/5_dec_vars/N6_115max'
+    opt_path3 = 'Output/5_dec_vars/N6_volmax_115con'
+    models = [opt_path1, opt_path2, opt_path3]
 
     speed1 = 190
     climb_angle1 = 10
