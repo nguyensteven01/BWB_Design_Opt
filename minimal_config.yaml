@@ -1,0 +1,17 @@
+# Minimal Papercut Configuration
+# This shows the bare minimum required to generate a PDF
+# Run from repo root: cargo run --release -- -c examples/minimal_config.yaml
+
+output:
+  mode: single
+  directory: ./code_output
+  filename: output.pdf
+
+files:
+  - path: design_optimization.py
+  - path: pitch_integrator_nonlinear.py
+
+# Simple cover page (most fields use defaults)
+cover_page:
+  enabled: true
+  title: "My Project"

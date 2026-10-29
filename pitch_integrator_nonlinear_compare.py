@@ -1,0 +1,113 @@
+# Pitch integrator nonlinear controller
+
+import numpy as np
+from utils.nonlinear_model import nonlinear_track_pitch
+from utils.read_hdf5 import extract_dataset_from_results
+from utils.plotters import niceplot_3_models_alt
+from utils.transient_errors import transient_errors
+
+from animate.compare_sim_data import animate_sim_data_comparison
+
+if __name__ == "__main__":
+    # Test the nonlinear model by integrating it forward in time.
+
+    savefig = False
+    make_video = False
+    make_plots = True
+
+    angle = 115
+
+    opt_path1 = 'Output/5_dec_vars/Gramian_comparison/inf_set'
+    opt_path2 = 'Output/5_dec_vars/Gramian_comparison/gramian_eigs'
+    models = [opt_path1, opt_path2]
+
+    speed1 = 190
+    climb_angle1 = 10
+    speed2 = 210
+    climb_angle2 = 0
+
+    # Single consolidated dictionary
+    sim_data = {}
+
+    data_file = 'Aero_data/aero_merged_cg_17.npz'
+    tf = 20
+    st = 10
+
+    # Initial
+    model_type = 'initial'
+    chs = 5  # center halfspan in m
+    whs = 12  # wing halfspan in m
+    ws = 35
+    ths = 4.9
+    wd = 10
+    design = np.array([chs,whs,ws,ths,wd])
+
+    t, x, u_hist, tp_hist = nonlinear_track_pitch(design, np.array([speed1, climb_angle1]), 
+                                                   np.array([speed2, climb_angle2]), data_file, tf, switch_time=st)
+
+    sim_data['initial'] = {
+        't': t,
+        'x': x,
+        'u': u_hist,
+        'tp': tp_hist,
+        'style': 'dashed',
+        'color': 'orange',
+        'name': 'initial'
+    }
+
+    sim_data['ref'] = {
+        't':t,
+        'x':tp_hist,
+        'style':'dotted',
+        'color':'purple'
+    }
+
+    for opt_path in models:
+        
+        model_type = opt_path.split('/')[-1]
+        output_hdf5_file = f"{opt_path}/opt_vars.hdf5"
+        x_opt = extract_dataset_from_results(output_hdf5_file, "x")
+
+        print("Below, model type is:")
+        print(model_type)
+        print(x_opt)
+        t, x, u_hist, tp_hist = nonlinear_track_pitch(x_opt, np.array([speed1, climb_angle1]), 
+                                                       np.array([speed2, climb_angle2]), data_file, tf, switch_time=st)
+
+        if model_type == 'inf_set':
+            key = model_type
+            color = 'salmon'
+        elif model_type == 'gramian_eigs':
+            key = model_type
+            color = 'teal'
+
+        sim_data[model_type] = {
+            't': t,
+            'x': x,
+            'u': u_hist,
+            'tp': tp_hist,
+            'style': 'solid',
+            'color': color,
+            'name':key
+        }
+
+    transient_errors(sim_data, switch_time = st)
+
+    if make_plots:
+        niceplot_3_models_alt(sim_data,['inf_set','gramian_eigs'],save=savefig,savename='nonlinear_gramian',compare=True)
+    if make_video:
+        key1, key2 = 'inf_set', 'gramian_eigs'
+        animate_sim_data_comparison(
+            sim_data,
+            key1,
+            key2,
+            plane_png="animate/bwb_flat2.png",    # nose pointing +x, RGBA
+            plane_png2="animate/bwb_flat.png",
+            save_path=f"Output/animations/{key1}_vs_{key2}_nonlinear_longitudinal.mp4", # writes MP4 (needs ffmpeg); use .gif for GIF
+        )
+
+
+
+
+
+
