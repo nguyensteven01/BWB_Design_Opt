@@ -177,7 +177,6 @@ if __name__ == "__main__":
 
     models = [opt_path1, opt_path2, opt_path3]
 
-
     init_file = "Output/5_dec_vars/N6_initial/bwb_inf_data.csv"
 
     saveit = False

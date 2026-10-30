@@ -110,21 +110,6 @@ plt.rcParams.update({
     'font.size': 15,
 })
 
-# print(X)
-# print(Y)
-# print(f'Z: {Z}')
-
-# # print(f'Altitude: {AL[tuple(indices)]}')
-# print(f'Speed: {ML[tuple(indices)]}')
-# print(f'Pitch: {PL[tuple(indices)]}')
-# print(f'CHS: {CHSL[tuple(indices)]}')
-# print(f'WHS: {WHSL[tuple(indices)]}')
-# print(f'ER: {ERL[tuple(indices)]}')
-
-# print(f'WS: {WSL[tuple(indices)]}')
-# print(f'THS: {THSL[tuple(indices)]}')
-# print(f'WD: {WDL[tuple(indices)]}')
-
 plt.figure(figsize=(8, 6))
 im = plt.pcolormesh(X, Y, Z, shading='auto', cmap='viridis')
 

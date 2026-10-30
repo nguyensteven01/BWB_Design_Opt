@@ -6,13 +6,10 @@ from utils.read_hdf5 import extract_dataset_from_results
 from utils.plotters import niceplot_3_models_alt
 from utils.transient_errors import transient_errors
 
-from animate.compare_sim_data import animate_sim_data_comparison
-
 if __name__ == "__main__":
     # Test the nonlinear model by integrating it forward in time.
 
     savefig = False
-    make_video = False
     make_plots = True
 
     angle = 115
@@ -95,19 +92,3 @@ if __name__ == "__main__":
 
     if make_plots:
         niceplot_3_models_alt(sim_data,['inf_set','gramian_eigs'],save=savefig,savename='nonlinear_gramian',compare=True)
-    if make_video:
-        key1, key2 = 'inf_set', 'gramian_eigs'
-        animate_sim_data_comparison(
-            sim_data,
-            key1,
-            key2,
-            plane_png="animate/bwb_flat2.png",    # nose pointing +x, RGBA
-            plane_png2="animate/bwb_flat.png",
-            save_path=f"Output/animations/{key1}_vs_{key2}_nonlinear_longitudinal.mp4", # writes MP4 (needs ffmpeg); use .gif for GIF
-        )
-
-
-
-
-
-
