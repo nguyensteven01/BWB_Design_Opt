@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 ''' This script is for processing some of the data and making some plots'''
 
-def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True, scatteron=False):
+def plot_the_sets(opt_path,init_csv_file,projection_line=True, scatteron=False):
 
     N_res = 6
     plt.rc('xtick', labelsize=14)
@@ -102,16 +102,8 @@ def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True, scatteron=
         plt.legend(fontsize=fsize*0.8,loc='upper left')
 
     plt.grid(True)
-    plt.axis('auto')
-    if saveit:
-        plt.axis('equal')
-        plt.savefig(f"{opt_path}/{model_type}_reach_proj_{states_abbrev[col1]}_{states_abbrev[col2]}.png",dpi=300)
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures/Reach Sets'
-        plt.savefig(f'{path_to_paper}/{model_type}_reach_proj_{states_abbrev[col1]}_{states_abbrev[col2]}.png',dpi=300)
-
-    else:
-        plt.axis('equal')
-        plt.show()
+    plt.axis('equal')
+    plt.show()
 
     col1 = 0
     col2 = 1
@@ -159,16 +151,8 @@ def plot_the_sets(opt_path,init_csv_file,saveit,projection_line=True, scatteron=
         plt.legend(fontsize=fsize,location='bottom left')
 
     plt.grid(True)
-    plt.axis('auto')
-    if saveit:
-        plt.axis('equal')
-        plt.savefig(f"{opt_path}/{model_type}_reach_proj_{states_abbrev[col1]}_{states_abbrev[col2]}.png",dpi=300)
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures/Reach Sets'
-        plt.savefig(f'{path_to_paper}/{model_type}_reach_proj_{states_abbrev[col1]}_{states_abbrev[col2]}.png',dpi=300)
-
-    else:
-        plt.axis('equal')
-        plt.show()
+    plt.axis('equal')
+    plt.show()
 
 if __name__ == "__main__":
     opt_path1 = "Output/5_dec_vars/N6_volmax"
@@ -179,8 +163,7 @@ if __name__ == "__main__":
 
     init_file = "Output/5_dec_vars/N6_initial/bwb_inf_data.csv"
 
-    saveit = False
     proj = True
     show_points = False
     for file in models:
-        plot_the_sets(file,init_file,saveit,projection_line = proj, scatteron = show_points)
+        plot_the_sets(file,init_file,projection_line = proj, scatteron = show_points)

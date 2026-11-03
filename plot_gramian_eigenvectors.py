@@ -93,15 +93,9 @@ if __name__ == '__main__':
     print('Eigenvectors (columns):')
     print(eigvecs)
 
-    saveit = False
     scale_plot = False
 
     fig, axes = plot_gramian_eigenvectors(gram, scale_by_eigenvalue=scale_plot)
 
-    if saveit:
-        fig.savefig('Output/5_dec_vars/Gramian_comparison/gramian_eigenvectors.png', dpi=300)
-        path_to_paper = '/Users/stevennguyen/Library/CloudStorage/OneDrive-Personal/UCSD/Research/AIAA 2026/Reachability Paper/Figures'
-        plt.savefig(f'{path_to_paper}/gramian_eigenvectors.png',dpi=300)
-    else:
-        axes.set_title(f'Eigenvector projection')
-        plt.show()
+    axes.set_title(f'Eigenvector projection')
+    plt.show()
