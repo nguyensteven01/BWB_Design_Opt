@@ -493,34 +493,40 @@ if __name__ == '__main__':
     x_low = np.array([3, 10, 15, 3, 10])
     x_upp = np.array([7, 20, 50, 8, 12])
 
+    opt_version = input("Which optimization problem would you like to run? Choose from: VM, DM, VMDC, or Gramian (VM = volume maximization, DM = direction maximization, VMDC = volume maximization with direction constraint, Gramian = maximizing eigenvalues as in Gupta et al.\n")
+    opt_version = opt_version.upper()
 
-    '''This will purely maximize the volume of reach set.'''
-    # results = optimize(x0, obj=fixed_scaled_volume_obj, meq = num_eqcon, con=fixed_stab_con, xl=x_low, xu = x_upp, \
-    #                    visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                     save_itr = 'major', save_filename = 'Output/opt_vars.hdf5')
-    # print_dict_as_table(results)
+    if opt_version == "VM":
+        '''This will purely maximize the volume of reach set.'''
+        results = optimize(x0, obj=fixed_scaled_volume_obj, meq = num_eqcon, con=fixed_stab_con, xl=x_low, xu = x_upp, \
+                           visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
+                            save_itr = 'major', save_filename = 'Output/opt_vars.hdf5')
+        print_dict_as_table(results)
 
-    '''Optimize some direction w/o direction constraint'''
-    results = optimize(x0, obj=fixed_direction_obj, meq = num_eqcon, con=fixed_stab_con, xl=x_low, xu = x_upp, \
-                        visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-                            save_itr = 'major', save_filename = 'Output/opt_vars.hdf5') 
-    print_dict_as_table(results)
+    elif opt_version == 'DM':
+        '''Optimize some direction w/o direction constraint'''
+        results = optimize(x0, obj=fixed_direction_obj, meq = num_eqcon, con=fixed_stab_con, xl=x_low, xu = x_upp, \
+                            visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
+                                save_itr = 'major', save_filename = 'Output/opt_vars.hdf5') 
+        print_dict_as_table(results)
 
-    '''Optimized for volume with direction constraint'''
-    # results = optimize(x0, obj=fixed_scaled_volume_obj, meq = num_eqcon, con=fixed_direction_stab_con, xl=x_low, xu = x_upp, \
-    #                     visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                         save_itr = 'major', save_filename = 'Output/opt_vars.hdf5', finite_diff_abs_step=np.array([1e-3, 1e-3, 1e-3, 1e-3, 1e-3]), \
-    #                             acc = 1e-4)
-    # print_dict_as_table(results)
+    elif opt_version == 'VMDC':
+        '''Optimized for volume with direction constraint'''
+        results = optimize(x0, obj=fixed_scaled_volume_obj, meq = num_eqcon, con=fixed_direction_stab_con, xl=x_low, xu = x_upp, \
+                            visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
+                                save_itr = 'major', save_filename = 'Output/opt_vars.hdf5', finite_diff_abs_step=np.array([1e-3, 1e-3, 1e-3, 1e-3, 1e-3]), \
+                                    acc = 1e-4)
+        print_dict_as_table(results)
 
-    ''' ----------------- others ------------------------- '''
+    elif opt_version == 'Gramian':
+        '''Optimize some eigenvalue of the reachability Gramian'''
+        results = optimize(x0, obj=fixed_gram_eig_obj, meq = num_eqcon, con=fixed_stab_con, xl=x_low, xu = x_upp, \
+                            visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
+                                save_itr = 'major', save_filename = 'Output/opt_vars.hdf5') 
+        print_dict_as_table(results)
+    else:
+        print('Choose from one of the listed options.')
 
-    # '''Optimize some eigenvalue of the reachability Gramian'''
-    # results = optimize(x0, obj=fixed_gram_eig_obj, meq = num_eqcon, con=fixed_stab_con, xl=x_low, xu = x_upp, \
-    #                     visualize = True, save_figname="Output/optimization_progress.png", summary_filename="Output/design_optimization.out", \
-    #                         save_itr = 'major', save_filename = 'Output/opt_vars.hdf5') 
-    # print_dict_as_table(results)
-
-    output_hdf5_file = "Output/opt_vars.hdf5"
-    x0 = extract_dataset_from_results(output_hdf5_file, "x")
-    hull = set_hull(x0,V0,save_set = True)
+    # output_hdf5_file = "Output/opt_vars.hdf5"
+    # x0 = extract_dataset_from_results(output_hdf5_file, "x")
+    # hull = set_hull(x0,V0,save_set = True)
