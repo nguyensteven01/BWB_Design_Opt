@@ -72,10 +72,10 @@ if __name__ == "__main__":
         t, x, u_hist, tp_hist = nonlinear_track_pitch(x_opt, np.array([speed1, climb_angle1]), 
                                                        np.array([speed2, climb_angle2]), data_file, tf, switch_time=st)
 
-        if model_type == f'volmax_sm2':
+        if model_type == f'volmax':
             key = 'vm'
             color = 'red'
-        elif model_type == f'{angle}max_sm2':
+        elif model_type == f'{angle}max':
             key = 'dm'
             color = 'blue'
         elif model_type == f'volmax_{angle}con':
@@ -97,8 +97,7 @@ if __name__ == "__main__":
     # error_bars(sim_data,save=savefig)
     if make_plots:
         print(sim_data.keys())
-        # niceplot_3_models_alt(sim_data, ['initial',f'volmax',f'{angle}max',f'volmax_{angle}con'], save=savefig)
-        niceplot_3_models_alt(sim_data, ['initial',f'volmax_sm2',f'{angle}max_sm2'], save=savefig)
+        niceplot_3_models_alt(sim_data, ['initial',f'volmax',f'{angle}max', f'volmax_{angle}con'], save=savefig)
 
 
 
