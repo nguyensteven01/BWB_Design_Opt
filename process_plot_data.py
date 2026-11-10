@@ -14,7 +14,7 @@ def plot_the_sets(opt_path,init_csv_file,projection_line=True, scatteron=False):
     model_type = opt_path.split('/')[-1][3:]
     print(f'Showing {model_type}')
 
-    angle = np.deg2rad(90)
+    angle = np.deg2rad(115)
     v = np.array([[0,0,np.cos(angle),np.sin(angle)]]).T
     # v = np.array([[np.cos(np.deg2rad(angle)),np.sin(np.deg2rad(angle)),0,0]]).T
 

@@ -9,9 +9,6 @@ from utils.transient_errors import transient_errors
 if __name__ == "__main__":
     # Test the nonlinear model by integrating it forward in time.
 
-    savefig = False
-    make_plots = True
-
     angle = 115
 
     opt_path1 = 'Output/5_dec_vars/Gramian_comparison/inf_set'
@@ -90,5 +87,4 @@ if __name__ == "__main__":
 
     transient_errors(sim_data, switch_time = st)
 
-    if make_plots:
-        niceplot_3_models_alt(sim_data,['inf_set','gramian_eigs'],save=savefig,savename='nonlinear_gramian',compare=True)
+    niceplot_3_models_alt(sim_data,['inf_set','gramian_eigs'],save=False,savename='nonlinear_gramian',compare=True)

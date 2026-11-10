@@ -9,9 +9,6 @@ from utils.transient_errors import transient_errors
 if __name__ == "__main__":
     # Test the nonlinear model by integrating it forward in time.
 
-    savefig = False
-    make_plots = True
-
     angle = 115
 
     opt_path1 = 'Output/5_dec_vars/N6_volmax'
@@ -94,10 +91,8 @@ if __name__ == "__main__":
 
     transient_errors(sim_data, switch_time = st)
 
-    # error_bars(sim_data,save=savefig)
-    if make_plots:
-        print(sim_data.keys())
-        niceplot_3_models_alt(sim_data, ['initial',f'volmax',f'{angle}max', f'volmax_{angle}con'], save=savefig)
+    error_bars(sim_data,save = False)
+    niceplot_3_models_alt(sim_data, ['initial',f'volmax',f'{angle}max', f'volmax_{angle}con'], save=False)
 
 
 

@@ -264,7 +264,7 @@ def niceplot_compare_models(sim_dictionary,models,save=False):
     else:
         plt.show()
 
-def error_bars(sim_dictionary,save=False):
+def error_bars(sim_dictionary,save=False, verbose = False):
     ''' This function makes error bars to compare the models'''
 
     plt.figure(figsize=(8,6))
@@ -273,9 +273,10 @@ def error_bars(sim_dictionary,save=False):
     plt.rcParams['lines.markersize'] = 12
 
     # Error computation for all trajectories
-    print("\n" + "="*70)
-    print("TRACKING ERROR ANALYSIS")
-    print("="*70)
+    if verbose:
+        print("\n" + "="*70)
+        print("TRACKING ERROR ANALYSIS")
+        print("="*70)
     
     for model, data in sim_dictionary.items():
         if model == 'ref':
@@ -302,13 +303,14 @@ def error_bars(sim_dictionary,save=False):
                 'error_norm': error_norm,
                 'u_norm':u_norm
         }
-        print(f"\n{model.upper()} Model:")
-        print(f"  Total error (L2 norm): {error_norm:.6f}")
-        print(f"  Velocity error:        {vel_err:.6f}")
-        print(f"  AOA error:             {aoa_err:.6f}")
-        print(f"  Pitch rate error:      {pr_err:.6f}")
-        print(f"  Pitch angle error:     {pitch_err:.6f}")
-        print(f"  Input L2 norm:         {u_norm:.6f}")
+        if verbose:
+            print(f"\n{model.upper()} Model:")
+            print(f"  Total error (L2 norm): {error_norm:.6f}")
+            print(f"  Velocity error:        {vel_err:.6f}")
+            print(f"  AOA error:             {aoa_err:.6f}")
+            print(f"  Pitch rate error:      {pr_err:.6f}")
+            print(f"  Pitch angle error:     {pitch_err:.6f}")
+            print(f"  Input L2 norm:         {u_norm:.6f}")
 
         if model == 'initial':
             init_vel = vel_err
@@ -326,11 +328,12 @@ def error_bars(sim_dictionary,save=False):
         total_rel_err = (init_total - error_norm)/init_total
         u_rel_norm = (init_u - u_norm)/init_u
 
-        print(f"  Velocity relative error:        {vel_rel_err*100:.2f}")
-        print(f"  AOA relative error:             {aoa_rel_err*100:.2f}")
-        print(f"  Pitch rate relative error:      {pr_rel_err*100:.2f}")
-        print(f"  Pitch angle relative error:     {pitch_rel_err*100:.2f}")
-        print(f"  Input relative L2 norm:         {u_rel_norm*100:.2f}")
+        if verbose:
+            print(f"  Velocity relative error:        {vel_rel_err*100:.2f}")
+            print(f"  AOA relative error:             {aoa_rel_err*100:.2f}")
+            print(f"  Pitch rate relative error:      {pr_rel_err*100:.2f}")
+            print(f"  Pitch angle relative error:     {pitch_rel_err*100:.2f}")
+            print(f"  Input relative L2 norm:         {u_rel_norm*100:.2f}")
 
 
         data['error']['relative'] = {
@@ -342,7 +345,8 @@ def error_bars(sim_dictionary,save=False):
             'u':u_rel_norm
         }
 
-    print("="*70 + "\n")
+    if verbose:
+        print("="*70 + "\n")
     
     models_list_label = ['vm','dm','vmdc']
     models_list_actual = [key for key in sim_dictionary.keys() if key not in ['initial', 'ref']]
