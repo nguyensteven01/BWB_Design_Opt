@@ -1,6 +1,7 @@
 # BWB Design Optimization
 
 This repository contains Python scripts for reproducing figures and analyses from our [paper](https://arxiv.org/abs/2604.26134).
+Distribution A: Approved for public release; distribution unlimited. Case no. AFRL-2026-2051.
 
 ## Main-directory files
 
