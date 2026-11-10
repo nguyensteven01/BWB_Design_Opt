@@ -200,7 +200,7 @@ def collective_constraints(x,desired_vel,v = None, extent0 = None,extent_bool = 
 
     if extent_bool:
         extent = compute_axis_extent(x,v,desired_vel, already_trimmed = True, trim_data = (tp, flight_point, data_file))
-        cons = np.block([cons, extent - 1.275 * extent0])
+        cons = np.block([cons, extent - 1.8 * extent0])
     if stab_bool:
         stability = static_stability(x,desired_vel,already_trimmed = True, trim_data = (tp, flight_point, data_file))
         cons = np.block([cons, stability.item() - desired_sm])
